@@ -1,0 +1,37 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".env"],
+  "globalEnv": [
+    "DATABASE_URL",
+    "TELEGRAM_BOT_TOKEN",
+    "ADMIN_CHAT_ID",
+    "MEILI_URL",
+    "MEILI_KEY",
+    "JWT_SECRET",
+    "NEXT_PUBLIC_API_URL",
+    "NEXT_PUBLIC_TELEGRAM_BOT",
+    "NODE_ENV",
+    "PORT"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "generate": {
+      "cache": false
+    }
+  }
+}

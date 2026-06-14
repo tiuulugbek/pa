@@ -1,0 +1,22 @@
+{
+  "name": "@pa/bot",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "start:dev": "ts-node src/index.ts",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@pa/db": "workspace:*",
+    "@pa/types": "workspace:*",
+    "dotenv": "^16.4.5",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.15",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}

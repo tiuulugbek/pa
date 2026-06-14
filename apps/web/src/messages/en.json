@@ -1,0 +1,161 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "industries": "Industries",
+    "about": "About us",
+    "projects": "Projects",
+    "news": "News",
+    "contact": "Contact",
+    "telegram": "Contact via Telegram"
+  },
+  "common": {
+    "details": "Details",
+    "inquiry": "Send inquiry",
+    "telegramInquiry": "Inquire via Telegram",
+    "view": "View",
+    "all": "All",
+    "search": "Search...",
+    "loading": "Loading...",
+    "noResults": "Nothing found",
+    "readMore": "Read more",
+    "backToList": "Back to list",
+    "certificates": "Certificates",
+    "specifications": "Specifications",
+    "documents": "Documents",
+    "download": "Download",
+    "relatedProducts": "Related products",
+    "industries": "Applicable industries",
+    "brand": "Brand",
+    "category": "Category"
+  },
+  "home": {
+    "heroTitle": "Reliable solutions for industry",
+    "heroSubtitle": "Equipment and measurement systems for oil & gas, chemical and mining industries",
+    "heroCatalog": "Product catalog",
+    "heroTelegram": "Contact via Telegram",
+    "statsExperience": "Years of experience",
+    "statsProjects": "Projects",
+    "statsBrands": "Brands",
+    "statsCoverage": "Across Uzbekistan",
+    "industriesTitle": "Industries",
+    "industriesSubtitle": "The main industrial sectors we serve",
+    "featuredTitle": "Featured products",
+    "processTitle": "How we work",
+    "process1": "Request",
+    "process1d": "Reach out via Telegram or form",
+    "process2": "Analysis",
+    "process2d": "Studying technical requirements",
+    "process3": "Delivery",
+    "process3d": "Certified equipment",
+    "process4": "Support",
+    "process4d": "Installation and warranty",
+    "brandsTitle": "Partner brands",
+    "newsTitle": "Latest news",
+    "ctaTitle": "Have questions?",
+    "ctaSubtitle": "Get in touch with our specialists via Telegram",
+    "ctaButton": "Message on Telegram"
+  },
+  "products": {
+    "title": "Product catalog",
+    "filters": "Filters",
+    "categories": "Categories",
+    "brands": "Brands",
+    "industryFilter": "Industry",
+    "certificateFilter": "Certificate",
+    "sortNew": "Newest",
+    "sortAlpha": "Alphabetical",
+    "sortPopular": "Most viewed",
+    "resultsCount": "products found",
+    "clearFilters": "Clear filters"
+  },
+  "industries": {
+    "title": "Industries",
+    "subtitle": "Tailored solutions for every industrial sector",
+    "problemsSolutions": "Challenges and solutions",
+    "productsForIndustry": "Products for this industry",
+    "projectsForIndustry": "Projects"
+  },
+  "about": {
+    "title": "About us",
+    "history": "Company history",
+    "mission": "Mission and values",
+    "certificates": "Certificates",
+    "partners": "Partner brands"
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "Major delivered projects",
+    "location": "Location",
+    "year": "Year",
+    "usedProducts": "Products used"
+  },
+  "news": {
+    "title": "News",
+    "subtitle": "Company news and technical articles",
+    "related": "Related articles"
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Get in touch with us",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "workHours": "Working hours",
+    "workHoursValue": "Monday — Friday, 9:00 — 18:00",
+    "formName": "Your name",
+    "formCompany": "Company",
+    "formPhone": "Phone number",
+    "formIndustry": "Industry",
+    "formMessage": "Your message",
+    "formSubmit": "Send",
+    "formSending": "Sending...",
+    "formSuccess": "Your message has been sent! We will contact you shortly.",
+    "formError": "An error occurred. Please try again."
+  },
+  "footer": {
+    "about": "Supplier of reliable equipment and measurement systems for the oil & gas, chemical and mining industries.",
+    "quickLinks": "Quick links",
+    "categories": "Categories",
+    "contact": "Contact",
+    "rights": "All rights reserved."
+  },
+  "search": {
+    "placeholder": "Search products...",
+    "hint": "Type to search the catalog",
+    "noResults": "No products found",
+    "open": "Search"
+  },
+  "compare": {
+    "title": "Compare",
+    "bar": "products selected for comparison",
+    "compareNow": "Compare",
+    "clear": "Clear",
+    "add": "Add to compare",
+    "remove": "Remove",
+    "empty": "Select up to 3 products to compare their specifications",
+    "spec": "Specification"
+  },
+  "quote": {
+    "button": "Request a quote",
+    "title": "Request a quote",
+    "name": "Your name",
+    "phone": "Phone",
+    "message": "What do you need?",
+    "send": "Send to Telegram",
+    "success": "Sent! We will get back to you.",
+    "error": "Something went wrong."
+  },
+  "productTabs": {
+    "overview": "Overview",
+    "specifications": "Specifications",
+    "documents": "Documents",
+    "related": "Related"
+  },
+  "mobileNav": {
+    "home": "Home",
+    "catalog": "Catalog",
+    "industries": "Industries",
+    "contact": "Contact"
+  }
+}

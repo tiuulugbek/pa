@@ -1,0 +1,161 @@
+{
+  "nav": {
+    "home": "Главная",
+    "products": "Продукция",
+    "industries": "Отрасли",
+    "about": "О компании",
+    "projects": "Проекты",
+    "news": "Новости",
+    "contact": "Контакты",
+    "telegram": "Связаться через Telegram"
+  },
+  "common": {
+    "details": "Подробнее",
+    "inquiry": "Отправить запрос",
+    "telegramInquiry": "Запрос через Telegram",
+    "view": "Смотреть",
+    "all": "Все",
+    "search": "Поиск...",
+    "loading": "Загрузка...",
+    "noResults": "Ничего не найдено",
+    "readMore": "Читать далее",
+    "backToList": "Вернуться к списку",
+    "certificates": "Сертификаты",
+    "specifications": "Технические характеристики",
+    "documents": "Документы",
+    "download": "Скачать",
+    "relatedProducts": "Похожие товары",
+    "industries": "Применяемые отрасли",
+    "brand": "Бренд",
+    "category": "Категория"
+  },
+  "home": {
+    "heroTitle": "Надёжные решения для промышленности",
+    "heroSubtitle": "Оборудование и измерительные системы для нефтегазовой, химической и горнодобывающей отраслей",
+    "heroCatalog": "Каталог продукции",
+    "heroTelegram": "Связаться через Telegram",
+    "statsExperience": "Лет опыта",
+    "statsProjects": "Проектов",
+    "statsBrands": "Брендов",
+    "statsCoverage": "По всему Узбекистану",
+    "industriesTitle": "Отрасли",
+    "industriesSubtitle": "Основные промышленные отрасли, которые мы обслуживаем",
+    "featuredTitle": "Рекомендуемая продукция",
+    "processTitle": "Процесс работы",
+    "process1": "Запрос",
+    "process1d": "Обращение через Telegram или форму",
+    "process2": "Анализ",
+    "process2d": "Изучение технических требований",
+    "process3": "Поставка",
+    "process3d": "Сертифицированное оборудование",
+    "process4": "Техподдержка",
+    "process4d": "Монтаж и гарантия",
+    "brandsTitle": "Партнёрские бренды",
+    "newsTitle": "Последние новости",
+    "ctaTitle": "Остались вопросы?",
+    "ctaSubtitle": "Свяжитесь с нашими специалистами через Telegram",
+    "ctaButton": "Написать в Telegram"
+  },
+  "products": {
+    "title": "Каталог продукции",
+    "filters": "Фильтры",
+    "categories": "Категории",
+    "brands": "Бренды",
+    "industryFilter": "Отрасль",
+    "certificateFilter": "Сертификат",
+    "sortNew": "Новые",
+    "sortAlpha": "По алфавиту",
+    "sortPopular": "Популярные",
+    "resultsCount": "товаров найдено",
+    "clearFilters": "Сбросить фильтры"
+  },
+  "industries": {
+    "title": "Отрасли",
+    "subtitle": "Специальные решения для каждой промышленной отрасли",
+    "problemsSolutions": "Проблемы и решения",
+    "productsForIndustry": "Продукция для этой отрасли",
+    "projectsForIndustry": "Проекты"
+  },
+  "about": {
+    "title": "О компании",
+    "history": "История компании",
+    "mission": "Миссия и ценности",
+    "certificates": "Сертификаты",
+    "partners": "Партнёрские бренды"
+  },
+  "projects": {
+    "title": "Проекты",
+    "subtitle": "Реализованные крупные проекты",
+    "location": "Местоположение",
+    "year": "Год",
+    "usedProducts": "Использованная продукция"
+  },
+  "news": {
+    "title": "Новости",
+    "subtitle": "Новости компании и технические статьи",
+    "related": "Похожие статьи"
+  },
+  "contact": {
+    "title": "Контакты",
+    "subtitle": "Свяжитесь с нами",
+    "address": "Адрес",
+    "phone": "Телефон",
+    "email": "Email",
+    "workHours": "Время работы",
+    "workHoursValue": "Понедельник — Пятница, 9:00 — 18:00",
+    "formName": "Ваше имя",
+    "formCompany": "Компания",
+    "formPhone": "Номер телефона",
+    "formIndustry": "Отрасль",
+    "formMessage": "Ваше сообщение",
+    "formSubmit": "Отправить",
+    "formSending": "Отправка...",
+    "formSuccess": "Сообщение отправлено! Скоро свяжемся с вами.",
+    "formError": "Произошла ошибка. Попробуйте снова."
+  },
+  "footer": {
+    "about": "Поставщик надёжного оборудования и измерительных систем для нефтегазовой, химической и горнодобывающей промышленности.",
+    "quickLinks": "Быстрые ссылки",
+    "categories": "Категории",
+    "contact": "Контакты",
+    "rights": "Все права защищены."
+  },
+  "search": {
+    "placeholder": "Поиск продукции...",
+    "hint": "Введите запрос для поиска по каталогу",
+    "noResults": "Продукция не найдена",
+    "open": "Поиск"
+  },
+  "compare": {
+    "title": "Сравнение",
+    "bar": "товаров выбрано для сравнения",
+    "compareNow": "Сравнить",
+    "clear": "Очистить",
+    "add": "Добавить к сравнению",
+    "remove": "Убрать",
+    "empty": "Выберите до 3 товаров для сравнения характеристик",
+    "spec": "Характеристика"
+  },
+  "quote": {
+    "button": "Запросить КП",
+    "title": "Запросить предложение",
+    "name": "Ваше имя",
+    "phone": "Телефон",
+    "message": "Что вам нужно?",
+    "send": "Отправить в Telegram",
+    "success": "Отправлено! Мы скоро свяжемся с вами.",
+    "error": "Произошла ошибка."
+  },
+  "productTabs": {
+    "overview": "Обзор",
+    "specifications": "Характеристики",
+    "documents": "Документы",
+    "related": "Похожие"
+  },
+  "mobileNav": {
+    "home": "Главная",
+    "catalog": "Каталог",
+    "industries": "Отрасли",
+    "contact": "Контакты"
+  }
+}

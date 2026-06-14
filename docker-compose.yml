@@ -1,0 +1,107 @@
+services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: power_automation_db
+      POSTGRES_USER: pa_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U pa_user -d power_automation_db']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - '5433:5432'
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.10
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_KEY:-masterKey_change_me}
+      MEILI_NO_ANALYTICS: 'true'
+    volumes:
+      - meilidata:/meili_data
+    ports:
+      - '7700:7700'
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redisdata:/data
+    ports:
+      - '6380:6379'
+
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      meilisearch:
+        condition: service_started
+      redis:
+        condition: service_started
+    # Push schema, seed once if empty, then start the API.
+    command: >
+      sh -c "cd /app/packages/db &&
+             npx prisma db push --skip-generate --accept-data-loss &&
+             npx prisma db seed || true &&
+             cd /app/apps/api && node dist/main.js"
+    ports:
+      - '3001:3001'
+    volumes:
+      # Bind-mount so generated/uploaded media is served directly from the host.
+      - ./apps/api/uploads:/app/apps/api/uploads
+
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+        NEXT_PUBLIC_TELEGRAM_BOT: ${NEXT_PUBLIC_TELEGRAM_BOT:-@power_automation_bot}
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - api
+    ports:
+      - '3002:3000'
+
+  bot:
+    build:
+      context: .
+      dockerfile: ./apps/bot/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  admin:
+    build:
+      context: .
+      dockerfile: ./apps/admin/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - api
+    ports:
+      - '3003:3003'
+
+volumes:
+  pgdata:
+  meilidata:
+  redisdata:

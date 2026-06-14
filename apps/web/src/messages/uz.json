@@ -1,0 +1,161 @@
+{
+  "nav": {
+    "home": "Bosh sahifa",
+    "products": "Mahsulotlar",
+    "industries": "Sohalar",
+    "about": "Biz haqimizda",
+    "projects": "Loyihalar",
+    "news": "Yangiliklar",
+    "contact": "Aloqa",
+    "telegram": "Telegram orqali murojaat"
+  },
+  "common": {
+    "details": "Batafsil",
+    "inquiry": "Soʻrov yuborish",
+    "telegramInquiry": "Telegram orqali soʻrov",
+    "view": "Koʻrish",
+    "all": "Barchasi",
+    "search": "Qidirish...",
+    "loading": "Yuklanmoqda...",
+    "noResults": "Hech narsa topilmadi",
+    "readMore": "Batafsil oʻqish",
+    "backToList": "Roʻyxatga qaytish",
+    "certificates": "Sertifikatlar",
+    "specifications": "Texnik xususiyatlar",
+    "documents": "Hujjatlar",
+    "download": "Yuklab olish",
+    "relatedProducts": "Oʻxshash mahsulotlar",
+    "industries": "Qoʻllanilgan sohalar",
+    "brand": "Brend",
+    "category": "Kategoriya"
+  },
+  "home": {
+    "heroTitle": "Sanoat uchun ishonchli yechimlar",
+    "heroSubtitle": "Neft-gaz, kimyo, togʻ-kon sanoati uchun uskuna va oʻlchov tizimlari",
+    "heroCatalog": "Mahsulotlar katalogi",
+    "heroTelegram": "Telegram orqali murojaat",
+    "statsExperience": "Yil tajriba",
+    "statsProjects": "Loyiha",
+    "statsBrands": "Brend",
+    "statsCoverage": "Oʻzbekiston boʻylab",
+    "industriesTitle": "Sohalar",
+    "industriesSubtitle": "Biz xizmat koʻrsatadigan asosiy sanoat tarmoqlari",
+    "featuredTitle": "Tavsiya etilgan mahsulotlar",
+    "processTitle": "Ish jarayoni",
+    "process1": "Soʻrov",
+    "process1d": "Telegram yoki forma orqali murojaat",
+    "process2": "Tahlil",
+    "process2d": "Texnik talablarni oʻrganish",
+    "process3": "Yetkazib berish",
+    "process3d": "Sertifikatlangan uskunalar",
+    "process4": "Texnik yordam",
+    "process4d": "Oʻrnatish va kafolat",
+    "brandsTitle": "Hamkor brendlar",
+    "newsTitle": "Soʻnggi yangiliklar",
+    "ctaTitle": "Savollaringiz bormi?",
+    "ctaSubtitle": "Mutaxassislarimiz bilan Telegram orqali bogʻlaning",
+    "ctaButton": "Telegram orqali yozish"
+  },
+  "products": {
+    "title": "Mahsulotlar katalogi",
+    "filters": "Filtrlar",
+    "categories": "Kategoriyalar",
+    "brands": "Brendlar",
+    "industryFilter": "Soha",
+    "certificateFilter": "Sertifikat",
+    "sortNew": "Yangi",
+    "sortAlpha": "Alifbo boʻyicha",
+    "sortPopular": "Koʻp koʻrilgan",
+    "resultsCount": "ta mahsulot topildi",
+    "clearFilters": "Filtrlarni tozalash"
+  },
+  "industries": {
+    "title": "Sohalar",
+    "subtitle": "Har bir sanoat tarmogʻi uchun maxsus yechimlar",
+    "problemsSolutions": "Muammolar va yechimlar",
+    "productsForIndustry": "Ushbu soha uchun mahsulotlar",
+    "projectsForIndustry": "Loyihalar"
+  },
+  "about": {
+    "title": "Biz haqimizda",
+    "history": "Kompaniya tarixi",
+    "mission": "Missiya va qadriyatlar",
+    "certificates": "Sertifikatlar",
+    "partners": "Hamkor brendlar"
+  },
+  "projects": {
+    "title": "Loyihalar",
+    "subtitle": "Amalga oshirilgan yirik loyihalar",
+    "location": "Joylashuv",
+    "year": "Yil",
+    "usedProducts": "Ishlatilgan mahsulotlar"
+  },
+  "news": {
+    "title": "Yangiliklar",
+    "subtitle": "Kompaniya yangiliklari va texnik maqolalar",
+    "related": "Oʻxshash maqolalar"
+  },
+  "contact": {
+    "title": "Aloqa",
+    "subtitle": "Biz bilan bogʻlaning",
+    "address": "Manzil",
+    "phone": "Telefon",
+    "email": "Email",
+    "workHours": "Ish vaqti",
+    "workHoursValue": "Dushanba — Juma, 9:00 — 18:00",
+    "formName": "Ismingiz",
+    "formCompany": "Kompaniya",
+    "formPhone": "Telefon raqami",
+    "formIndustry": "Soha",
+    "formMessage": "Xabaringiz",
+    "formSubmit": "Yuborish",
+    "formSending": "Yuborilmoqda...",
+    "formSuccess": "Xabaringiz yuborildi! Tez orada bogʻlanamiz.",
+    "formError": "Xatolik yuz berdi. Qaytadan urinib koʻring."
+  },
+  "footer": {
+    "about": "Neft-gaz, kimyo va togʻ-kon sanoati uchun ishonchli uskuna va oʻlchov tizimlari yetkazib beruvchi.",
+    "quickLinks": "Tez havolalar",
+    "categories": "Kategoriyalar",
+    "contact": "Aloqa",
+    "rights": "Barcha huquqlar himoyalangan."
+  },
+  "search": {
+    "placeholder": "Mahsulot qidirish...",
+    "hint": "Katalogdan qidirish uchun yozing",
+    "noResults": "Mahsulot topilmadi",
+    "open": "Qidirish"
+  },
+  "compare": {
+    "title": "Taqqoslash",
+    "bar": "ta mahsulot taqqoslash uchun tanlandi",
+    "compareNow": "Taqqoslash",
+    "clear": "Tozalash",
+    "add": "Taqqoslashga qoʻshish",
+    "remove": "Olib tashlash",
+    "empty": "Xususiyatlarni taqqoslash uchun 3 tagacha mahsulot tanlang",
+    "spec": "Xususiyat"
+  },
+  "quote": {
+    "button": "Soʻrov yuborish",
+    "title": "Soʻrov yuborish",
+    "name": "Ismingiz",
+    "phone": "Telefon",
+    "message": "Nima kerak?",
+    "send": "Telegramga yuborish",
+    "success": "Yuborildi! Tez orada bogʻlanamiz.",
+    "error": "Xatolik yuz berdi."
+  },
+  "productTabs": {
+    "overview": "Umumiy",
+    "specifications": "Xususiyatlar",
+    "documents": "Hujjatlar",
+    "related": "Oʻxshash"
+  },
+  "mobileNav": {
+    "home": "Bosh",
+    "catalog": "Katalog",
+    "industries": "Sohalar",
+    "contact": "Aloqa"
+  }
+}
