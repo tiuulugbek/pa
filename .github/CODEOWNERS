@@ -1,0 +1,9 @@
+# Replace the owner below when the project moves to a GitHub organization.
+* @tiuulugbek
+
+/apps/api/ @tiuulugbek
+/apps/web/ @tiuulugbek
+/apps/admin/ @tiuulugbek
+/apps/bot/ @tiuulugbek
+/packages/db/ @tiuulugbek
+/.github/ @tiuulugbek
