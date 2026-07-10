@@ -19,7 +19,11 @@ jobs:
     timeout-minutes: 20
     env:
       DATABASE_URL: postgresql://pa_user:ci_password@localhost:5432/power_automation_db
-      JWT_SECRET: ci-only-secret-not-for-production
+      JWT_SECRET: ci-only-secret-that-is-deliberately-longer-than-sixty-four-characters-123456789
+      JWT_EXPIRES_IN: 2h
+      JWT_ISSUER: power-automation-api
+      JWT_AUDIENCE: power-automation-admin
+      CORS_ORIGINS: http://localhost:3000,http://localhost:3003
       TELEGRAM_BOT_TOKEN: ci-placeholder
       ADMIN_CHAT_ID: '0'
       MEILI_URL: http://localhost:7700
