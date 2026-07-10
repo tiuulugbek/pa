@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgresql://pa_user:ci_password@localhost:5432/power_automation_db
+      JWT_SECRET: ci-only-secret-not-for-production
+      TELEGRAM_BOT_TOKEN: ci-placeholder
+      ADMIN_CHAT_ID: '0'
+      MEILI_URL: http://localhost:7700
+      MEILI_KEY: ci-meili-key
+      REDIS_URL: redis://localhost:6379
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      API_INTERNAL_URL: http://localhost:3001
+      NEXT_PUBLIC_TELEGRAM_BOT: '@power_automation_bot'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Lint and type-check
+        run: pnpm lint
+
+      - name: Build all workspaces
+        run: pnpm build
+
+      - name: Validate Docker Compose
+        run: |
+          cp .env.example .env
+          DB_PASSWORD=ci_password \
+          MEILI_KEY=ci_meili_key \
+          NEXT_PUBLIC_API_URL=http://localhost:3001 \
+          NEXT_PUBLIC_TELEGRAM_BOT=@power_automation_bot \
+          docker compose config --quiet
