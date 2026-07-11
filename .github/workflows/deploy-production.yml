@@ -1,0 +1,78 @@
+name: Deploy Production
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      target_commit:
+        description: Optional commit SHA; defaults to origin/main
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: power-automation-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      ${{
+        (github.event_name == 'workflow_dispatch') ||
+        (github.event.workflow_run.conclusion == 'success' &&
+         github.event.workflow_run.head_branch == 'main' &&
+         github.event.workflow_run.event == 'push')
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+
+    steps:
+      - name: Resolve target commit
+        id: target
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            echo "commit=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          elif [[ -n "${{ inputs.target_commit }}" ]]; then
+            echo "commit=${{ inputs.target_commit }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "commit=origin/main" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configure SSH
+        shell: bash
+        env:
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_PORT: ${{ secrets.PROD_PORT }}
+        run: |
+          test -n "$PROD_SSH_KEY"
+          test -n "$PROD_HOST"
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$PROD_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          PORT="${PROD_PORT:-22}"
+          ssh-keyscan -p "$PORT" -H "$PROD_HOST" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy exact tested commit
+        shell: bash
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_PORT: ${{ secrets.PROD_PORT }}
+          PROD_USER: ${{ secrets.PROD_USER }}
+          TARGET_COMMIT: ${{ steps.target.outputs.commit }}
+        run: |
+          test -n "$PROD_USER"
+          PORT="${PROD_PORT:-22}"
+          ssh -p "$PORT" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            "$PROD_USER@$PROD_HOST" \
+            "cd /var/www/pm.crm24uz.com && chmod +x scripts/deploy-production.sh && TARGET_COMMIT='$TARGET_COMMIT' APP_DIR='/var/www/pm.crm24uz.com' ./scripts/deploy-production.sh"
