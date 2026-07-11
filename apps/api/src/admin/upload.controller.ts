@@ -10,7 +10,7 @@ import {
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { randomUUID } from 'crypto';
 import { mkdirSync } from 'fs';
-import { diskStorage } from 'multer';
+import { diskStorage, type Options as MulterOptions } from 'multer';
 import { extname, join } from 'path';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -27,37 +27,41 @@ const allowedMimeTypes = new Map<string, string>([
 
 const storage = diskStorage({
   destination: uploadDirectory,
-  filename: (_req, file, cb) => {
+  filename: (_req, file, callback) => {
     const safeExtension = allowedMimeTypes.get(file.mimetype);
     if (!safeExtension) {
-      cb(new BadRequestException('Unsupported file type'), '');
+      callback(new BadRequestException('Unsupported file type'), '');
       return;
     }
-    cb(null, `${randomUUID()}${safeExtension}`);
+    callback(null, `${randomUUID()}${safeExtension}`);
   },
 });
 
-const multerOptions = {
+const multerOptions: MulterOptions = {
   storage,
   limits: {
     fileSize: 10 * 1024 * 1024,
     files: 10,
   },
-  fileFilter: (
-    _req: Express.Request,
-    file: Express.Multer.File,
-    callback: (error: Error | null, acceptFile: boolean) => void,
-  ) => {
+  fileFilter: (_req, file, callback) => {
     const expectedExtension = allowedMimeTypes.get(file.mimetype);
     const suppliedExtension = extname(file.originalname).toLowerCase();
-    if (!expectedExtension || (file.mimetype !== 'image/jpeg' && suppliedExtension !== expectedExtension)) {
-      callback(new BadRequestException('Unsupported file type or extension'), false);
+
+    if (!expectedExtension) {
+      callback(new BadRequestException('Unsupported file type'));
       return;
     }
-    if (file.mimetype === 'image/jpeg' && !['.jpg', '.jpeg'].includes(suppliedExtension)) {
-      callback(new BadRequestException('Unsupported JPEG extension'), false);
+
+    if (file.mimetype === 'image/jpeg') {
+      if (!['.jpg', '.jpeg'].includes(suppliedExtension)) {
+        callback(new BadRequestException('Unsupported JPEG extension'));
+        return;
+      }
+    } else if (suppliedExtension !== expectedExtension) {
+      callback(new BadRequestException('Unsupported file extension'));
       return;
     }
+
     callback(null, true);
   },
 };
