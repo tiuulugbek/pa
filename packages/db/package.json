@@ -14,13 +14,13 @@
     "generate": "prisma generate",
     "migrate": "prisma migrate dev",
     "push": "prisma db push",
-    "seed": "ts-node --compiler-options {\"module\":\"commonjs\"} prisma/seed.ts",
+    "seed": "node scripts/run-seed.cjs",
     "studio": "prisma studio",
     "build": "prisma generate && tsc -p tsconfig.build.json",
     "lint": "tsc --noEmit"
   },
   "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"commonjs\"} prisma/seed.ts"
+    "seed": "node scripts/run-seed.cjs"
   },
   "dependencies": {
     "@prisma/client": "^5.19.1",
