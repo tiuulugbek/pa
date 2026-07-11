@@ -55,15 +55,19 @@ export default async function LocaleLayout({
   params,
 }: {
   children: ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  const { locale } = params;
+  const { locale } = await params;
   if (!routing.locales.includes(locale as 'uz' | 'ru' | 'en')) notFound();
   setRequestLocale(locale);
 
   const messages = await getMessages();
-  const [categories, featured] = await Promise.all([api.categories(), api.featured()]);
-  const theme = cookies().get('theme')?.value === 'dark' ? 'dark' : '';
+  const [categories, featured, cookieStore] = await Promise.all([
+    api.categories(),
+    api.featured(),
+    cookies(),
+  ]);
+  const theme = cookieStore.get('theme')?.value === 'dark' ? 'dark' : '';
 
   return (
     <html lang={locale} className={`${inter.variable} ${plexMono.variable} ${theme}`}>
