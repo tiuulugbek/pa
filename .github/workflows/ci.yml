@@ -51,9 +51,22 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Capture production dependency audit
-        id: audit
         continue-on-error: true
-        run: pnpm audit --prod --audit-level=high --json > audit-report.json
+        run: pnpm audit --prod --json > audit-report.json
+
+      - name: Validate production dependency audit
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('audit-report.json', 'utf8'));
+          const vulnerabilities = report.metadata?.vulnerabilities;
+          if (!vulnerabilities) {
+            throw new Error('Dependency audit report is missing vulnerability metadata');
+          }
+          const total = Object.values(vulnerabilities).reduce((sum, value) => sum + Number(value), 0);
+          console.log('Production dependency vulnerabilities:', vulnerabilities);
+          if (total !== 0) process.exit(1);
+          NODE
 
       - name: Upload dependency audit report
         uses: actions/upload-artifact@v4
@@ -66,31 +79,11 @@ jobs:
       - name: Generate Prisma client
         run: pnpm db:generate
 
-      - name: Capture lint and type-check
-        id: lint
-        continue-on-error: true
-        run: pnpm lint > lint-report.txt 2>&1
+      - name: Lint and type-check
+        run: pnpm lint
 
-      - name: Upload lint report
-        uses: actions/upload-artifact@v4
-        with:
-          name: lint-report
-          path: lint-report.txt
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Capture build
-        id: build
-        continue-on-error: true
-        run: pnpm build > build-report.txt 2>&1
-
-      - name: Upload build report
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-report
-          path: build-report.txt
-          if-no-files-found: error
-          retention-days: 7
+      - name: Build all workspaces
+        run: pnpm build
 
       - name: Validate Docker Compose
         run: |
@@ -100,7 +93,3 @@ jobs:
           NEXT_PUBLIC_API_URL=http://localhost:3001 \
           NEXT_PUBLIC_TELEGRAM_BOT=@power_automation_bot \
           docker compose config --quiet
-
-      - name: Enforce quality gates
-        if: steps.audit.outcome == 'failure' || steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
-        run: exit 1
