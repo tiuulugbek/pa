@@ -8,9 +8,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import type { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { randomUUID } from 'crypto';
 import { mkdirSync } from 'fs';
-import { diskStorage, type Options as MulterOptions } from 'multer';
+import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -48,17 +49,17 @@ const multerOptions: MulterOptions = {
     const suppliedExtension = extname(file.originalname).toLowerCase();
 
     if (!expectedExtension) {
-      callback(new BadRequestException('Unsupported file type'));
+      callback(new BadRequestException('Unsupported file type'), false);
       return;
     }
 
     if (file.mimetype === 'image/jpeg') {
       if (!['.jpg', '.jpeg'].includes(suppliedExtension)) {
-        callback(new BadRequestException('Unsupported JPEG extension'));
+        callback(new BadRequestException('Unsupported JPEG extension'), false);
         return;
       }
     } else if (suppliedExtension !== expectedExtension) {
-      callback(new BadRequestException('Unsupported file extension'));
+      callback(new BadRequestException('Unsupported file extension'), false);
       return;
     }
 
