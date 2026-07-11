@@ -96,7 +96,9 @@ export default async function HomePage({ params }: { params: LocaleParams }) {
             {Object.entries(INDUSTRY_META).map(([key, meta]) => (
               <Link key={key} href={`/mahsulotlar?industry=${key}`} className="card group p-5">
                 <IndustryIcon name={meta.icon} className="h-9 w-9 text-blue-mid" />
-                <h3 className="mt-4 font-semibold text-text-dark group-hover:text-blue-dark">{pick(meta, loc)}</h3>
+                <h3 className="mt-4 font-semibold text-text-dark group-hover:text-blue-dark">
+                  {loc === 'ru' ? meta.ru : loc === 'en' ? meta.en : meta.uz}
+                </h3>
               </Link>
             ))}
           </div>
