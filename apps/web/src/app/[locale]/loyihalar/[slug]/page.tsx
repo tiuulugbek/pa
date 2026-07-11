@@ -8,20 +8,24 @@ import { alternatesFor } from '@/lib/seo';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { SmartImage } from '@/components/SmartImage';
 
-export const revalidate = 600; // ISR: regenerate every 10 min
+export const revalidate = 600;
+
+type ProjectPageParams = Promise<{ locale: string; slug: string }>;
 
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: ProjectPageParams;
 }): Promise<Metadata> {
+  const { locale, slug } = await params;
+
   try {
-    const proj = await api.project(params.slug);
-    const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
+    const proj = await api.project(slug);
+    const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
     return {
       title: pick(proj, 'title', loc),
       description: pick(proj, 'desc', loc).slice(0, 160),
-      alternates: alternatesFor(params.locale, `/loyihalar/${params.slug}`),
+      alternates: alternatesFor(locale, `/loyihalar/${slug}`),
     };
   } catch {
     return { title: 'Loyiha' };
@@ -31,15 +35,16 @@ export async function generateMetadata({
 export default async function ProjectPage({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: ProjectPageParams;
 }) {
-  const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
-  setRequestLocale(params.locale);
+  const { locale, slug } = await params;
+  const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
+  setRequestLocale(locale);
   const t = await getTranslations('projects');
 
   let proj;
   try {
-    proj = await api.project(params.slug);
+    proj = await api.project(slug);
   } catch {
     notFound();
   }
