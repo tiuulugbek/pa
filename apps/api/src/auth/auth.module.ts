@@ -6,6 +6,15 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 
+function parseJwtExpiry(value: string | undefined): number {
+  if (!value) return 7_200;
+  const seconds = Number(value);
+  if (!Number.isInteger(seconds) || seconds < 300 || seconds > 86_400) {
+    throw new Error('JWT_EXPIRES_IN_SECONDS must be an integer between 300 and 86400');
+  }
+  return seconds;
+}
+
 @Module({
   imports: [
     ConfigModule,
@@ -21,7 +30,7 @@ import { JwtStrategy } from './jwt.strategy';
         return {
           secret,
           signOptions: {
-            expiresIn: config.get<string>('JWT_EXPIRES_IN') ?? '2h',
+            expiresIn: parseJwtExpiry(config.get<string>('JWT_EXPIRES_IN_SECONDS')),
             issuer: config.get<string>('JWT_ISSUER') ?? 'power-automation-api',
             audience: config.get<string>('JWT_AUDIENCE') ?? 'power-automation-admin',
           },
