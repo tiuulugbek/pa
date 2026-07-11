@@ -1,12 +1,17 @@
 import 'dotenv/config';
-import { Telegraf, Markup, Context } from 'telegraf';
+import { Context, Markup, Telegraf } from 'telegraf';
 import { prisma } from '@pa/db';
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const adminChatId = process.env.ADMIN_CHAT_ID;
 
 if (!token) {
-  console.error('❌ TELEGRAM_BOT_TOKEN is not set. Bot cannot start.');
+  console.error('TELEGRAM_BOT_TOKEN is not set. Bot cannot start.');
+  process.exit(1);
+}
+
+if (!adminChatId) {
+  console.error('ADMIN_CHAT_ID is not set. Bot cannot start safely.');
   process.exit(1);
 }
 
@@ -23,6 +28,16 @@ function nowFormatted(): string {
   }).format(new Date());
 }
 
+function escapeHtml(value: string | null | undefined): string {
+  if (!value) return '—';
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function isAdminChat(ctx: Context): boolean {
+  const chatId = ctx.chat?.id;
+  return chatId !== undefined && String(chatId) === String(adminChatId);
+}
+
 const statusButtons = (inquiryId: number) =>
   Markup.inlineKeyboard([
     [
@@ -31,59 +46,74 @@ const statusButtons = (inquiryId: number) =>
     ],
   ]);
 
-// ---------------- /start (with optional product_<id> payload) ----------------
 bot.start(async (ctx) => {
-  // Telegraf versions differ on payload access; parse from the raw text to be safe.
-  const rawText = 'text' in ctx.message ? ctx.message.text : '';
-  const payload = rawText.replace(/^\/start(@\w+)?\s*/, '').trim();
-  const match = /^product_(\d+)$/.exec(payload);
+  try {
+    const rawText = 'text' in ctx.message ? ctx.message.text : '';
+    const payload = rawText.replace(/^\/start(@\w+)?\s*/, '').trim();
+    const match = /^product_(\d{1,10})$/.exec(payload);
 
-  if (!match) {
+    if (!match) {
+      await ctx.reply(
+        'Assalomu alaykum! Power Automation botiga xush kelibsiz. 🏭\n\n' +
+          'Bizning saytdan mahsulot tanlab, "Telegram orqali soʻrov" tugmasini bosing — soʻrovingizni shu yerda qabul qilamiz.',
+      );
+      return;
+    }
+
+    const productId = Number(match[1]);
+    if (!Number.isSafeInteger(productId) || productId < 1) {
+      await ctx.reply('Mahsulot identifikatori notoʻgʻri.');
+      return;
+    }
+
+    const product = await prisma.product.findFirst({
+      where: { id: productId, isActive: true },
+      select: { id: true, nameUz: true },
+    });
+
+    if (!product) {
+      await ctx.reply('Kechirasiz, bu mahsulot topilmadi. Iltimos, saytdan qaytadan urinib koʻring.');
+      return;
+    }
+
+    const from = ctx.from;
+    const inquiry = await prisma.inquiry.create({
+      data: {
+        productId: product.id,
+        telegramUserId: from ? String(from.id) : null,
+        telegramUsername: from?.username?.slice(0, 32) ?? null,
+        name: from
+          ? [from.first_name, from.last_name].filter(Boolean).join(' ').slice(0, 100)
+          : null,
+        message: `Telegram orqali soʻrov: ${product.nameUz}`.slice(0, 2000),
+      },
+    });
+
     await ctx.reply(
-      'Assalomu alaykum! Power Automation botiga xush kelibsiz. 🏭\n\n' +
-        'Bizning saytdan mahsulot tanlab, "Telegram orqali soʻrov" tugmasini bosing — soʻrovingizni shu yerda qabul qilamiz.',
+      `✅ Soʻrovingiz qabul qilindi!\n\n` +
+        `📦 Mahsulot: <b>${escapeHtml(product.nameUz)}</b>\n\n` +
+        `Mutaxassislarimiz tez orada siz bilan bogʻlanadi. Rahmat!`,
+      { parse_mode: 'HTML' },
     );
-    return;
-  }
 
-  const productId = Number(match[1]);
-  const product = await prisma.product.findUnique({ where: { id: productId } });
-
-  if (!product) {
-    await ctx.reply('Kechirasiz, bu mahsulot topilmadi. Iltimos, saytdan qaytadan urinib koʻring.');
-    return;
-  }
-
-  const from = ctx.from;
-  const inquiry = await prisma.inquiry.create({
-    data: {
-      productId: product.id,
-      telegramUserId: from ? String(from.id) : null,
-      telegramUsername: from?.username ?? null,
-      name: from ? [from.first_name, from.last_name].filter(Boolean).join(' ') : null,
-      message: `Telegram orqali soʻrov: ${product.nameUz}`,
-    },
-  });
-
-  await ctx.reply(
-    `✅ Soʻrovingiz qabul qilindi!\n\n` +
-      `📦 Mahsulot: <b>${product.nameUz}</b>\n\n` +
-      `Mutaxassislarimiz tez orada siz bilan bogʻlanadi. Rahmat!`,
-    { parse_mode: 'HTML' },
-  );
-
-  // Notify admin group
-  if (adminChatId) {
     const text =
       `🔔 <b>Yangi soʻrov!</b>\n` +
-      `📦 Mahsulot: ${product.nameUz}\n` +
-      `👤 Foydalanuvchi: ${from?.username ? '@' + from.username : inquiry.name ?? '—'}\n` +
-      `📱 Telegram ID: ${from?.id ?? '—'}\n` +
+      `📦 Mahsulot: ${escapeHtml(product.nameUz)}\n` +
+      `👤 Foydalanuvchi: ${from?.username ? '@' + escapeHtml(from.username) : escapeHtml(inquiry.name)}\n` +
+      `📱 Telegram ID: ${escapeHtml(from ? String(from.id) : undefined)}\n` +
       `⏰ Vaqt: ${nowFormatted()}`;
-    await bot.telegram.sendMessage(adminChatId, text, {
-      parse_mode: 'HTML',
-      ...statusButtons(inquiry.id),
-    });
+
+    try {
+      await bot.telegram.sendMessage(adminChatId, text, {
+        parse_mode: 'HTML',
+        ...statusButtons(inquiry.id),
+      });
+    } catch (error) {
+      console.error(`Failed to notify admin for inquiry ${inquiry.id}`, error);
+    }
+  } catch (error) {
+    console.error('Failed to process /start command', error);
+    await ctx.reply('Soʻrovni qabul qilishda vaqtinchalik xatolik yuz berdi. Iltimos, keyinroq urinib koʻring.');
   }
 });
 
@@ -91,15 +121,20 @@ bot.help((ctx) =>
   ctx.reply('Saytdagi mahsulot sahifasidan "Telegram orqali soʻrov" tugmasini bosing.'),
 );
 
-// ---------------- Admin inline buttons → update inquiry status ----------------
 bot.action(/^seen_(\d+)$/, async (ctx) => {
-  const id = Number(ctx.match[1]);
-  await updateStatus(ctx, id, 'SEEN', 'Koʻrildi ✅');
+  if (!isAdminChat(ctx)) {
+    await ctx.answerCbQuery('Bu amal faqat admin guruhida mavjud');
+    return;
+  }
+  await updateStatus(ctx, Number(ctx.match[1]), 'SEEN', 'Koʻrildi ✅');
 });
 
 bot.action(/^replied_(\d+)$/, async (ctx) => {
-  const id = Number(ctx.match[1]);
-  await updateStatus(ctx, id, 'REPLIED', 'Javob berildi 💬');
+  if (!isAdminChat(ctx)) {
+    await ctx.answerCbQuery('Bu amal faqat admin guruhida mavjud');
+    return;
+  }
+  await updateStatus(ctx, Number(ctx.match[1]), 'REPLIED', 'Javob berildi 💬');
 });
 
 async function updateStatus(
@@ -108,23 +143,39 @@ async function updateStatus(
   status: 'SEEN' | 'REPLIED',
   label: string,
 ): Promise<void> {
+  if (!Number.isSafeInteger(id) || id < 1) {
+    await ctx.answerCbQuery('Notoʻgʻri soʻrov identifikatori');
+    return;
+  }
+
   try {
+    const inquiry = await prisma.inquiry.findUnique({ where: { id }, select: { id: true } });
+    if (!inquiry) {
+      await ctx.answerCbQuery('Soʻrov topilmadi');
+      return;
+    }
+
     await prisma.inquiry.update({ where: { id }, data: { status } });
     await ctx.answerCbQuery(`Holat yangilandi: ${label}`);
+
     const message = ctx.callbackQuery?.message;
     if (message && 'text' in message) {
-      await ctx.editMessageText(`${message.text}\n\n— Holat: <b>${label}</b>`, {
+      const original = message.text.replace(/\n\n— Holat: .*$/s, '');
+      await ctx.editMessageText(`${escapeHtml(original)}\n\n— Holat: <b>${escapeHtml(label)}</b>`, {
         parse_mode: 'HTML',
       });
     }
-  } catch (err) {
-    console.error('Failed to update inquiry status', err);
+  } catch (error) {
+    console.error(`Failed to update inquiry ${id}`, error);
     await ctx.answerCbQuery('Xatolik yuz berdi');
   }
 }
 
-// ---------------- Launch ----------------
-void bot.launch().then(() => console.log('🤖 Power Automation bot started'));
+bot.catch((error) => {
+  console.error('Unhandled Telegram bot error', error);
+});
+
+void bot.launch().then(() => console.log('Power Automation bot started'));
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
