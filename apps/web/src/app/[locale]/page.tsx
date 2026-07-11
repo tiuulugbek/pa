@@ -130,7 +130,7 @@ export default async function HomePage({ params }: { params: LocaleParams }) {
           <div className="grid gap-6 md:grid-cols-3">
             {latestNews.map((item) => (
               <Link key={item.id} href={`/yangiliklar/${item.slug}`} className="card overflow-hidden">
-                {item.thumbnail && <SmartImage src={item.thumbnail} alt={pick(item, 'title', loc)} width={640} height={360} className="aspect-video w-full object-cover" />}
+                {item.thumbnail && <SmartImage src={item.thumbnail} alt={pick(item, 'title', loc)} className="aspect-video w-full object-cover" />}
                 <div className="p-5"><h3 className="font-semibold text-text-dark">{pick(item, 'title', loc)}</h3></div>
               </Link>
             ))}
