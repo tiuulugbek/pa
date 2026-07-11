@@ -13,18 +13,17 @@ import { ProcessDiagram } from '@/components/ProcessDiagram';
 
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string; slug: string };
-}): Promise<Metadata> {
-  const ind = industryBySlug(params.slug);
+type IndustryPageParams = Promise<{ locale: string; slug: string }>;
+
+export async function generateMetadata({ params }: { params: IndustryPageParams }): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const ind = industryBySlug(slug);
   if (!ind) return { title: 'Soha' };
-  const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
+  const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
   return {
     title: loc === 'ru' ? ind.ru : loc === 'en' ? ind.en : ind.uz,
     description: loc === 'ru' ? ind.descRu : loc === 'en' ? ind.descEn : ind.descUz,
-    alternates: alternatesFor(params.locale, `/sohalar/${params.slug}`),
+    alternates: alternatesFor(locale, `/sohalar/${slug}`),
   };
 }
 
@@ -56,15 +55,12 @@ const PROBLEMS: Record<string, { uz: string; ru: string }[]> = {
   ],
 };
 
-export default async function IndustryPage({
-  params,
-}: {
-  params: { locale: string; slug: string };
-}) {
-  const ind = industryBySlug(params.slug);
+export default async function IndustryPage({ params }: { params: IndustryPageParams }) {
+  const { locale, slug } = await params;
+  const ind = industryBySlug(slug);
   if (!ind) notFound();
-  const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
-  setRequestLocale(params.locale);
+  const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
+  setRequestLocale(locale);
   const t = await getTranslations('industries');
 
   const [productsRes, projects] = await Promise.all([
@@ -84,7 +80,6 @@ export default async function IndustryPage({
         ]}
       />
 
-      {/* Hero banner */}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-dark to-blue-mid py-16 text-white">
         <div className="container-x flex items-center gap-5">
           <div className="grid h-16 w-16 place-items-center rounded-2xl bg-white/15">
@@ -98,7 +93,6 @@ export default async function IndustryPage({
       </section>
 
       <div className="container-x py-14">
-        {/* Instrumentation process diagram */}
         <div className="mb-14">
           <h2 className="h2 mb-6">
             {loc === 'ru' ? 'Где применяются приборы' : loc === 'en' ? 'Where instruments are used' : 'Asboblar qayerda qoʻllaniladi'}
@@ -106,7 +100,6 @@ export default async function IndustryPage({
           <ProcessDiagram locale={loc} />
         </div>
 
-        {/* Problems & solutions */}
         {problems.length > 0 && (
           <div className="mb-14">
             <h2 className="h2 mb-6">{t('problemsSolutions')}</h2>
@@ -121,7 +114,6 @@ export default async function IndustryPage({
           </div>
         )}
 
-        {/* Products */}
         {productsRes.data.length > 0 && (
           <div className="mb-14">
             <h2 className="h2 mb-6">{t('productsForIndustry')}</h2>
@@ -133,17 +125,12 @@ export default async function IndustryPage({
           </div>
         )}
 
-        {/* Projects */}
         {projects.length > 0 && (
           <div>
             <h2 className="h2 mb-6">{t('projectsForIndustry')}</h2>
             <div className="grid gap-6 md:grid-cols-2">
               {projects.map((proj) => (
-                <Link
-                  key={proj.id}
-                  href={`/loyihalar/${proj.slug}`}
-                  className="card p-6"
-                >
+                <Link key={proj.id} href={`/loyihalar/${proj.slug}`} className="card p-6">
                   <span className="badge">{proj.year}</span>
                   <h3 className="mt-2 text-lg font-semibold text-text-dark">
                     {pick(proj, 'title', loc)}
