@@ -11,13 +11,14 @@ import { alternatesFor } from '@/lib/seo';
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const t = await getTranslations({ locale: params.locale, namespace: 'contact' });
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'contact' });
   return {
     title: t('title'),
     description: t('subtitle'),
-    alternates: alternatesFor(params.locale, '/aloqa'),
+    alternates: alternatesFor(locale, '/aloqa'),
   };
 }
 
@@ -48,9 +49,14 @@ const FAQ = [
   },
 ];
 
-export default async function ContactPage({ params }: { params: { locale: string } }) {
-  const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
-  setRequestLocale(params.locale);
+export default async function ContactPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
+  setRequestLocale(locale);
   const t = await getTranslations('contact');
   const address = loc === 'ru' ? COMPANY.addressRu : COMPANY.addressUz;
 
@@ -62,7 +68,6 @@ export default async function ContactPage({ params }: { params: { locale: string
         <p className="mt-3 text-text-mid">{t('subtitle')}</p>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-2">
-          {/* Info + map */}
           <div className="space-y-6">
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
@@ -111,17 +116,14 @@ export default async function ContactPage({ params }: { params: { locale: string
               <Send className="h-5 w-5" /> {COMPANY.telegram}
             </a>
 
-            {/* Yandex Maps embed (Tashkent) — lazy-loaded on scroll */}
             <MapEmbed />
           </div>
 
-          {/* Form */}
           <div className="rounded-2xl border border-blue-bg bg-white p-6 sm:p-8">
             <ContactForm locale={loc} />
           </div>
         </div>
 
-        {/* FAQ + FAQPage schema */}
         <section className="mt-16">
           <h2 className="h2 mb-6">
             {loc === 'ru' ? 'Частые вопросы' : loc === 'en' ? 'Frequently asked questions' : 'Koʻp soʻraladigan savollar'}

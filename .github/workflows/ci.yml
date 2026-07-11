@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      DATABASE_URL: postgresql://pa_user:ci_password@localhost:5432/power_automation_db
+      JWT_SECRET: ci-only-secret-that-is-deliberately-longer-than-sixty-four-characters-123456789
+      JWT_EXPIRES_IN_SECONDS: '7200'
+      JWT_ISSUER: power-automation-api
+      JWT_AUDIENCE: power-automation-admin
+      CORS_ORIGINS: http://localhost:3000,http://localhost:3003
+      TELEGRAM_BOT_TOKEN: ci-placeholder
+      ADMIN_CHAT_ID: '0'
+      MEILI_URL: http://localhost:7700
+      MEILI_KEY: ci-meili-key
+      REDIS_URL: redis://localhost:6379
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      API_INTERNAL_URL: http://localhost:3001
+      NEXT_PUBLIC_TELEGRAM_BOT: '@power_automation_bot'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Capture production dependency audit
+        continue-on-error: true
+        run: pnpm audit --prod --json > audit-report.json
+
+      - name: Validate production dependency audit
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('audit-report.json', 'utf8'));
+          const vulnerabilities = report.metadata?.vulnerabilities;
+          if (!vulnerabilities) throw new Error('Dependency audit report is missing vulnerability metadata');
+          const total = Object.values(vulnerabilities).reduce((sum, value) => sum + Number(value), 0);
+          console.log('Production dependency vulnerabilities:', vulnerabilities);
+          if (total !== 0) process.exit(1);
+          NODE
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Capture lint and type-check
+        id: lint
+        continue-on-error: true
+        run: pnpm lint > lint-report.txt 2>&1
+
+      - name: Upload lint report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: lint-report.txt
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Capture build
+        id: build
+        continue-on-error: true
+        run: pnpm build > build-report.txt 2>&1
+
+      - name: Upload build report
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-report
+          path: build-report.txt
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Validate Docker Compose
+        run: |
+          cp .env.example .env
+          DB_PASSWORD=ci_password \
+          MEILI_KEY=ci_meili_key \
+          NEXT_PUBLIC_API_URL=http://localhost:3001 \
+          NEXT_PUBLIC_TELEGRAM_BOT=@power_automation_bot \
+          docker compose config --quiet
+
+      - name: Enforce build quality
+        if: steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
+        run: exit 1

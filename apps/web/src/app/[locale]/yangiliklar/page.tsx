@@ -10,16 +10,16 @@ import { Pagination } from '@/components/Pagination';
 
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}): Promise<Metadata> {
-  const t = await getTranslations({ locale: params.locale, namespace: 'news' });
+type NewsPageParams = Promise<{ locale: string }>;
+type NewsSearchParams = Promise<{ page?: string; category?: string }>;
+
+export async function generateMetadata({ params }: { params: NewsPageParams }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'news' });
   return {
     title: t('title'),
     description: t('subtitle'),
-    alternates: alternatesFor(params.locale, '/yangiliklar'),
+    alternates: alternatesFor(locale, '/yangiliklar'),
   };
 }
 
@@ -27,16 +27,17 @@ export default async function NewsPage({
   params,
   searchParams,
 }: {
-  params: { locale: string };
-  searchParams: { page?: string; category?: string };
+  params: NewsPageParams;
+  searchParams: NewsSearchParams;
 }) {
-  const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
-  setRequestLocale(params.locale);
+  const [{ locale }, query] = await Promise.all([params, searchParams]);
+  const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
+  setRequestLocale(locale);
   const t = await getTranslations('news');
 
   const result = await api.news({
-    page: searchParams.page,
-    category: searchParams.category,
+    page: query.page,
+    category: query.category,
     limit: 9,
   });
 
@@ -53,7 +54,7 @@ export default async function NewsPage({
           <Link
             href="/yangiliklar"
             className={`rounded-full px-4 py-1.5 text-sm ${
-              !searchParams.category ? 'bg-blue-dark text-white' : 'border border-blue-bg bg-white text-text-mid'
+              !query.category ? 'bg-blue-dark text-white' : 'border border-blue-bg bg-white text-text-mid'
             }`}
           >
             {loc === 'ru' ? 'Все' : 'Barchasi'}
@@ -63,7 +64,7 @@ export default async function NewsPage({
               key={c}
               href={`/yangiliklar?category=${encodeURIComponent(c)}`}
               className={`rounded-full px-4 py-1.5 text-sm ${
-                searchParams.category === c
+                query.category === c
                   ? 'bg-blue-dark text-white'
                   : 'border border-blue-bg bg-white text-text-mid'
               }`}

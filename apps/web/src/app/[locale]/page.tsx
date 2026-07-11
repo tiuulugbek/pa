@@ -13,13 +13,17 @@ import { SmartImage } from '@/components/SmartImage';
 
 export const dynamic = 'force-dynamic';
 
-export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
-  return { alternates: alternatesFor(params.locale, '/') };
+type LocaleParams = Promise<{ locale: string }>;
+
+export async function generateMetadata({ params }: { params: LocaleParams }): Promise<Metadata> {
+  const { locale } = await params;
+  return { alternates: alternatesFor(locale, '/') };
 }
 
-export default async function HomePage({ params }: { params: { locale: string } }) {
-  const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
-  setRequestLocale(params.locale);
+export default async function HomePage({ params }: { params: LocaleParams }) {
+  const { locale } = await params;
+  const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
+  setRequestLocale(locale);
   const t = await getTranslations('home');
 
   const [featured, brands, latestNews] = await Promise.all([
@@ -44,7 +48,6 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
   return (
     <>
-      {/* 1. Hero */}
       <section className="relative flex min-h-[88vh] items-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#062c6b] via-[#0A4DB8] to-[#1A7FE8]" />
         <div className="hero-grid absolute inset-0" />
@@ -52,160 +55,88 @@ export default async function HomePage({ params }: { params: { locale: string } 
         <div className="hero-orb absolute -right-10 bottom-0 h-80 w-80 rounded-full" style={{ animationDelay: '3s' }} />
         <div className="absolute inset-0 bg-black/45" />
         <div className="container-x relative z-10 py-24 text-white">
-          <h1 className="max-w-3xl animate-fade-in-up text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
-            {t('heroTitle')}
-          </h1>
-          <p className="mt-5 max-w-2xl animate-fade-in-up text-lg text-white/85">
-            {t('heroSubtitle')}
-          </p>
+          <h1 className="max-w-3xl animate-fade-in-up text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">{t('heroTitle')}</h1>
+          <p className="mt-5 max-w-2xl animate-fade-in-up text-lg text-white/85">{t('heroSubtitle')}</p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link href="/mahsulotlar" className="btn-primary bg-white text-blue-dark hover:bg-white/90">
-              {t('heroCatalog')}
-              <ArrowRight className="h-4 w-4" />
+              {t('heroCatalog')}<ArrowRight className="h-4 w-4" />
             </Link>
-            <a
-              href={telegramLink()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-outline"
-            >
-              <Send className="h-4 w-4" />
-              {t('heroTelegram')}
+            <a href={telegramLink()} target="_blank" rel="noopener noreferrer" className="btn-outline">
+              <Send className="h-4 w-4" />{t('heroTelegram')}
             </a>
           </div>
         </div>
       </section>
 
-      {/* 2. Trust stats */}
       <section className="bg-blue-dark py-12 text-white">
-        <div className="container-x grid grid-cols-2 gap-8 text-center lg:grid-cols-4">
+        <div className="container-x grid grid-cols-2 gap-6 text-center lg:grid-cols-4">
           {stats.map((s, i) => (
-            <div key={i} className="reveal">
-              <div className="text-4xl font-bold text-blue-accent sm:text-5xl">
-                {s.text ? '🇺🇿' : <CountUp end={s.value} suffix={s.suffix} />}
-              </div>
-              <div className="mt-2 text-sm text-white/80">{s.label}</div>
+            <div key={i}>
+              <div className="text-3xl font-bold text-blue-accent sm:text-4xl">{s.text ? '🇺🇿' : <CountUp end={s.value} suffix={s.suffix} />}</div>
+              <div className="mt-1 text-sm text-white/75">{s.label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 3. Industries */}
-      <section className="section">
+      <section className="container-x py-16">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div><h2 className="h2">{t('featuredTitle')}</h2><p className="mt-2 text-text-mid">{t('featuredSubtitle')}</p></div>
+          <Link href="/mahsulotlar" className="hidden items-center gap-1 text-sm font-semibold text-blue-dark sm:flex">{t('viewAll')}<ArrowRight className="h-4 w-4" /></Link>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {featured.map((product) => <ProductCard key={product.id} product={product} locale={loc} />)}
+        </div>
+      </section>
+
+      <section className="bg-surface-muted py-16">
         <div className="container-x">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="h2 reveal">{t('industriesTitle')}</h2>
-            <p className="reveal mt-3 text-text-mid">{t('industriesSubtitle')}</p>
-          </div>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {INDUSTRY_META.map((ind) => (
-              <Link
-                key={ind.key}
-                href={`/sohalar/${ind.slug}`}
-                className="card reveal group relative overflow-hidden p-6"
-              >
-                <div className="grid h-12 w-12 place-items-center rounded-lg bg-blue-bg text-blue-dark transition-colors group-hover:bg-blue-dark group-hover:text-white">
-                  <IndustryIcon name={ind.icon} className="h-6 w-6" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-text-dark">
-                  {loc === 'ru' ? ind.ru : loc === 'en' ? ind.en : ind.uz}
+          <div className="mb-8"><h2 className="h2">{t('industriesTitle')}</h2><p className="mt-2 text-text-mid">{t('industriesSubtitle')}</p></div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {Object.entries(INDUSTRY_META).map(([key, meta]) => (
+              <Link key={key} href={`/mahsulotlar?industry=${key}`} className="card group p-5">
+                <IndustryIcon name={meta.icon} className="h-9 w-9 text-blue-mid" />
+                <h3 className="mt-4 font-semibold text-text-dark group-hover:text-blue-dark">
+                  {loc === 'ru' ? meta.ru : loc === 'en' ? meta.en : meta.uz}
                 </h3>
-                <p className="mt-2 text-sm text-text-mid">
-                  {loc === 'ru' ? ind.descRu : loc === 'en' ? ind.descEn : ind.descUz}
-                </p>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 4. Featured products */}
-      {featured.length > 0 && (
-        <section className="section bg-white">
-          <div className="container-x">
-            <h2 className="h2 reveal text-center">{t('featuredTitle')}</h2>
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {featured.map((p) => (
-                <ProductCard key={p.id} product={p} locale={loc} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      <section className="container-x py-16">
+        <div className="mb-8"><h2 className="h2">{t('brandsTitle')}</h2></div>
+        <BrandsCarousel brands={brands} />
+      </section>
 
-      {/* 5. Process */}
-      <section className="section">
+      <section className="bg-blue-dark py-16 text-white">
         <div className="container-x">
-          <h2 className="h2 reveal text-center">{t('processTitle')}</h2>
-          <div className="relative mt-12 grid gap-8 md:grid-cols-4">
-            <div className="absolute left-0 right-0 top-7 hidden border-t-2 border-dashed border-blue-accent/40 md:block" />
+          <div className="mb-10 text-center"><h2 className="text-3xl font-bold">{t('processTitle')}</h2></div>
+          <div className="grid gap-6 md:grid-cols-4">
             {processSteps.map((step, i) => (
-              <div key={i} className="reveal relative z-10 text-center">
-                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-blue-dark text-white">
-                  <step.icon className="h-6 w-6" />
-                </div>
-                <h3 className="mt-4 font-semibold text-text-dark">{step.title}</h3>
-                <p className="mt-1 text-sm text-text-mid">{step.desc}</p>
+              <div key={i} className="text-center">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-white/10"><step.icon className="h-6 w-6 text-blue-accent" /></div>
+                <h3 className="mt-4 font-semibold">{step.title}</h3><p className="mt-2 text-sm text-white/70">{step.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 6. Brands carousel */}
-      <section className="bg-white py-12">
-        <div className="container-x">
-          <h2 className="mb-6 text-center text-sm font-semibold uppercase tracking-widest text-text-mid">
-            {t('brandsTitle')}
-          </h2>
-          <BrandsCarousel brands={brands} />
-        </div>
-      </section>
-
-      {/* 7. Latest news */}
       {latestNews.length > 0 && (
-        <section className="section">
-          <div className="container-x">
-            <h2 className="h2 reveal text-center">{t('newsTitle')}</h2>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {latestNews.map((post) => (
-                <Link
-                  key={post.id}
-                  href={`/yangiliklar/${post.slug}`}
-                  className="card reveal overflow-hidden"
-                >
-                  <div className="aspect-[16/9] w-full">
-                    <SmartImage src={post.thumbnail} alt={pick(post, 'title', loc)} className="h-full w-full" />
-                  </div>
-                  <div className="p-4">
-                    {post.category && <span className="badge">{post.category}</span>}
-                    <h3 className="mt-2 line-clamp-2 font-semibold text-text-dark">
-                      {pick(post, 'title', loc)}
-                    </h3>
-                  </div>
-                </Link>
-              ))}
-            </div>
+        <section className="container-x py-16">
+          <div className="mb-8 flex items-end justify-between"><h2 className="h2">{t('newsTitle')}</h2><Link href="/yangiliklar" className="text-sm font-semibold text-blue-dark">{t('viewAll')}</Link></div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {latestNews.map((item) => (
+              <Link key={item.id} href={`/yangiliklar/${item.slug}`} className="card overflow-hidden">
+                {item.thumbnail && <SmartImage src={item.thumbnail} alt={pick(item, 'title', loc)} className="aspect-video w-full object-cover" />}
+                <div className="p-5"><h3 className="font-semibold text-text-dark">{pick(item, 'title', loc)}</h3></div>
+              </Link>
+            ))}
           </div>
         </section>
       )}
-
-      {/* 8. Footer CTA */}
-      <section className="bg-gradient-to-r from-blue-dark to-blue-mid py-16 text-center text-white">
-        <div className="container-x">
-          <h2 className="text-3xl font-bold">{t('ctaTitle')}</h2>
-          <p className="mt-3 text-white/85">{t('ctaSubtitle')}</p>
-          <a
-            href={telegramLink()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-telegram mx-auto mt-7 px-6 py-3"
-          >
-            <Send className="h-5 w-5" />
-            {t('ctaButton')}
-          </a>
-        </div>
-      </section>
     </>
   );
 }

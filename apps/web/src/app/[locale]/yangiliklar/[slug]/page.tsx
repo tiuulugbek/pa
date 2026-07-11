@@ -8,38 +8,34 @@ import { Link } from '@/i18n/navigation';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { SmartImage } from '@/components/SmartImage';
 
-export const revalidate = 600; // ISR: regenerate every 10 min
+export const revalidate = 600;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string; slug: string };
-}): Promise<Metadata> {
+type NewsPostParams = Promise<{ locale: string; slug: string }>;
+
+export async function generateMetadata({ params }: { params: NewsPostParams }): Promise<Metadata> {
+  const { locale, slug } = await params;
   try {
-    const post = await api.newsPost(params.slug);
-    const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
+    const post = await api.newsPost(slug);
+    const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
     return {
       title: pick(post, 'title', loc),
       description: pick(post, 'body', loc).slice(0, 160),
-      alternates: alternatesFor(params.locale, `/yangiliklar/${params.slug}`),
+      alternates: alternatesFor(locale, `/yangiliklar/${slug}`),
     };
   } catch {
     return { title: 'Yangilik' };
   }
 }
 
-export default async function NewsPostPage({
-  params,
-}: {
-  params: { locale: string; slug: string };
-}) {
-  const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
-  setRequestLocale(params.locale);
+export default async function NewsPostPage({ params }: { params: NewsPostParams }) {
+  const { locale, slug } = await params;
+  const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
+  setRequestLocale(locale);
   const t = await getTranslations('news');
 
   let post;
   try {
-    post = await api.newsPost(params.slug);
+    post = await api.newsPost(slug);
   } catch {
     notFound();
   }
@@ -84,11 +80,7 @@ export default async function NewsPostPage({
             <h2 className="mb-5 text-xl font-semibold text-text-dark">{t('related')}</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               {post.related.map((r) => (
-                <Link
-                  key={r.id}
-                  href={`/yangiliklar/${r.slug}`}
-                  className="card p-5"
-                >
+                <Link key={r.id} href={`/yangiliklar/${r.slug}`} className="card p-5">
                   {r.category && <span className="badge">{r.category}</span>}
                   <h3 className="mt-2 line-clamp-2 font-semibold text-text-dark">
                     {pick(r, 'title', loc)}

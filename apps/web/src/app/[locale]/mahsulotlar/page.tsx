@@ -12,16 +12,19 @@ import { EmptyState } from '@/components/EmptyState';
 
 export const dynamic = 'force-dynamic';
 
+type CatalogPageParams = Promise<{ locale: string }>;
+
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string };
+  params: CatalogPageParams;
 }): Promise<Metadata> {
-  const t = await getTranslations({ locale: params.locale, namespace: 'products' });
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'products' });
   return {
     title: t('title'),
     description: t('title'),
-    alternates: alternatesFor(params.locale, '/mahsulotlar'),
+    alternates: alternatesFor(locale, '/mahsulotlar'),
   };
 }
 
@@ -39,29 +42,30 @@ export default async function CatalogPage({
   params,
   searchParams,
 }: {
-  params: { locale: string };
-  searchParams: SearchParams;
+  params: CatalogPageParams;
+  searchParams: Promise<SearchParams>;
 }) {
-  const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
-  setRequestLocale(params.locale);
+  const [{ locale }, query] = await Promise.all([params, searchParams]);
+  const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
+  setRequestLocale(locale);
   const t = await getTranslations('products');
 
   const [categories, brands, result] = await Promise.all([
     api.categories(),
     api.brands(),
     api.products({
-      categoryId: searchParams.category,
-      brandId: searchParams.brand,
-      industry: searchParams.industry,
-      certificate: searchParams.certificate,
-      search: searchParams.search,
-      sort: searchParams.sort,
-      page: searchParams.page,
+      categoryId: query.category,
+      brandId: query.brand,
+      industry: query.industry,
+      certificate: query.certificate,
+      search: query.search,
+      sort: query.sort,
+      page: query.page,
       limit: 20,
     }),
   ]);
 
-  const localePrefix = params.locale === 'uz' ? '' : `/${params.locale}`;
+  const localePrefix = locale === 'uz' ? '' : `/${locale}`;
   const itemListJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',

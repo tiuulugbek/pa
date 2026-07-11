@@ -11,8 +11,21 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import type { Prisma } from '@pa/db';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import {
+  CreateBrandDto,
+  CreateCategoryDto,
+  CreateNewsDto,
+  CreateProductDto,
+  CreateProjectDto,
+  InquiryQueryDto,
+  InquiryStatusDto,
+  UpdateBrandDto,
+  UpdateCategoryDto,
+  UpdateNewsDto,
+  UpdateProductDto,
+  UpdateProjectDto,
+} from './admin.dto';
 import { AdminService } from './admin.service';
 
 @Controller('admin')
@@ -25,7 +38,6 @@ export class AdminController {
     return this.admin.dashboard();
   }
 
-  // ---- Products ----
   @Get('products')
   listProducts() {
     return this.admin.listProducts();
@@ -37,15 +49,12 @@ export class AdminController {
   }
 
   @Post('products')
-  createProduct(@Body() body: Prisma.ProductUncheckedCreateInput) {
+  createProduct(@Body() body: CreateProductDto) {
     return this.admin.createProduct(body);
   }
 
   @Put('products/:id')
-  updateProduct(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: Prisma.ProductUncheckedUpdateInput,
-  ) {
+  updateProduct(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateProductDto) {
     return this.admin.updateProduct(id, body);
   }
 
@@ -54,22 +63,18 @@ export class AdminController {
     return this.admin.deleteProduct(id);
   }
 
-  // ---- Categories ----
   @Get('categories')
   listCategories() {
     return this.admin.listCategories();
   }
 
   @Post('categories')
-  createCategory(@Body() body: Prisma.CategoryUncheckedCreateInput) {
+  createCategory(@Body() body: CreateCategoryDto) {
     return this.admin.createCategory(body);
   }
 
   @Put('categories/:id')
-  updateCategory(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: Prisma.CategoryUncheckedUpdateInput,
-  ) {
+  updateCategory(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateCategoryDto) {
     return this.admin.updateCategory(id, body);
   }
 
@@ -78,22 +83,18 @@ export class AdminController {
     return this.admin.deleteCategory(id);
   }
 
-  // ---- Brands ----
   @Get('brands')
   listBrands() {
     return this.admin.listBrands();
   }
 
   @Post('brands')
-  createBrand(@Body() body: Prisma.BrandUncheckedCreateInput) {
+  createBrand(@Body() body: CreateBrandDto) {
     return this.admin.createBrand(body);
   }
 
   @Put('brands/:id')
-  updateBrand(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: Prisma.BrandUncheckedUpdateInput,
-  ) {
+  updateBrand(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateBrandDto) {
     return this.admin.updateBrand(id, body);
   }
 
@@ -102,7 +103,6 @@ export class AdminController {
     return this.admin.deleteBrand(id);
   }
 
-  // ---- News ----
   @Get('news')
   listNews() {
     return this.admin.listNews();
@@ -114,15 +114,12 @@ export class AdminController {
   }
 
   @Post('news')
-  createNews(@Body() body: Prisma.NewsPostUncheckedCreateInput) {
+  createNews(@Body() body: CreateNewsDto) {
     return this.admin.createNews(body);
   }
 
   @Put('news/:id')
-  updateNews(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: Prisma.NewsPostUncheckedUpdateInput,
-  ) {
+  updateNews(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateNewsDto) {
     return this.admin.updateNews(id, body);
   }
 
@@ -131,7 +128,6 @@ export class AdminController {
     return this.admin.deleteNews(id);
   }
 
-  // ---- Projects ----
   @Get('projects')
   listProjects() {
     return this.admin.listProjects();
@@ -143,15 +139,12 @@ export class AdminController {
   }
 
   @Post('projects')
-  createProject(@Body() body: Prisma.ProjectUncheckedCreateInput) {
+  createProject(@Body() body: CreateProjectDto) {
     return this.admin.createProject(body);
   }
 
   @Put('projects/:id')
-  updateProject(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: Prisma.ProjectUncheckedUpdateInput,
-  ) {
+  updateProject(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateProjectDto) {
     return this.admin.updateProject(id, body);
   }
 
@@ -160,17 +153,16 @@ export class AdminController {
     return this.admin.deleteProject(id);
   }
 
-  // ---- Inquiries ----
   @Get('inquiries')
-  listInquiries(@Query('status') status?: string) {
-    return this.admin.listInquiries(status);
+  listInquiries(@Query() query: InquiryQueryDto) {
+    return this.admin.listInquiries(query.status);
   }
 
   @Patch('inquiries/:id/status')
   updateInquiryStatus(
     @Param('id', ParseIntPipe) id: number,
-    @Body('status') status: 'NEW' | 'SEEN' | 'REPLIED',
+    @Body() body: InquiryStatusDto,
   ) {
-    return this.admin.updateInquiryStatus(id, status);
+    return this.admin.updateInquiryStatus(id, body.status);
   }
 }

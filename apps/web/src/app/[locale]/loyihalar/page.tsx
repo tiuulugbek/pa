@@ -10,16 +10,20 @@ import { SmartImage } from '@/components/SmartImage';
 
 export const dynamic = 'force-dynamic';
 
+type ProjectsPageParams = Promise<{ locale: string }>;
+type ProjectsSearchParams = Promise<{ industry?: string }>;
+
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string };
+  params: ProjectsPageParams;
 }): Promise<Metadata> {
-  const t = await getTranslations({ locale: params.locale, namespace: 'projects' });
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'projects' });
   return {
     title: t('title'),
     description: t('subtitle'),
-    alternates: alternatesFor(params.locale, '/loyihalar'),
+    alternates: alternatesFor(locale, '/loyihalar'),
   };
 }
 
@@ -27,13 +31,14 @@ export default async function ProjectsPage({
   params,
   searchParams,
 }: {
-  params: { locale: string };
-  searchParams: { industry?: string };
+  params: ProjectsPageParams;
+  searchParams: ProjectsSearchParams;
 }) {
-  const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
-  setRequestLocale(params.locale);
+  const [{ locale }, { industry }] = await Promise.all([params, searchParams]);
+  const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
+  setRequestLocale(locale);
   const t = await getTranslations('projects');
-  const projects = await api.projects({ industry: searchParams.industry });
+  const projects = await api.projects({ industry });
 
   return (
     <>
@@ -42,12 +47,11 @@ export default async function ProjectsPage({
         <h1 className="text-3xl font-bold text-text-dark sm:text-4xl">{t('title')}</h1>
         <p className="mt-3 text-text-mid">{t('subtitle')}</p>
 
-        {/* Industry filter */}
         <div className="mt-6 flex flex-wrap gap-2">
           <Link
             href="/loyihalar"
             className={`rounded-full px-4 py-1.5 text-sm ${
-              !searchParams.industry ? 'bg-blue-dark text-white' : 'bg-white text-text-mid border border-blue-bg'
+              !industry ? 'bg-blue-dark text-white' : 'bg-white text-text-mid border border-blue-bg'
             }`}
           >
             {loc === 'ru' ? 'Все' : 'Barchasi'}
@@ -57,7 +61,7 @@ export default async function ProjectsPage({
               key={ind.key}
               href={`/loyihalar?industry=${ind.key}`}
               className={`rounded-full px-4 py-1.5 text-sm ${
-                searchParams.industry === ind.key
+                industry === ind.key
                   ? 'bg-blue-dark text-white'
                   : 'bg-white text-text-mid border border-blue-bg'
               }`}

@@ -6,28 +6,30 @@ import type { ProductDocument, Specification } from '@pa/types';
 import { pick, telegramLink, industryLabel } from '@pa/ui';
 import { api, API_URL } from '@/lib/api';
 import { alternatesFor } from '@/lib/seo';
-import { COMPANY } from '@/lib/constants';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { ProductGallery } from '@/components/ProductGallery';
 import { ProductCard } from '@/components/ProductCard';
 import { ProductTabs } from '@/components/ProductTabs';
 
-export const revalidate = 600; // ISR: regenerate every 10 min
+export const revalidate = 600;
+
+type ProductPageParams = Promise<{ locale: string; slug: string }>;
 
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: ProductPageParams;
 }): Promise<Metadata> {
+  const { locale, slug } = await params;
   try {
-    const product = await api.product(params.slug);
-    const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
+    const product = await api.product(slug);
+    const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
     const name = pick(product, 'name', loc);
     const desc = pick(product, 'description', loc);
     return {
       title: name,
       description: desc.slice(0, 160),
-      alternates: alternatesFor(params.locale, `/mahsulotlar/${params.slug}`),
+      alternates: alternatesFor(locale, `/mahsulotlar/${slug}`),
       openGraph: { title: name, description: desc.slice(0, 160), type: 'website' },
     };
   } catch {
@@ -38,15 +40,16 @@ export async function generateMetadata({
 export default async function ProductPage({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: ProductPageParams;
 }) {
-  const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
-  setRequestLocale(params.locale);
+  const { locale, slug } = await params;
+  const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
+  setRequestLocale(locale);
   const t = await getTranslations('common');
 
   let product;
   try {
-    product = await api.product(params.slug);
+    product = await api.product(slug);
   } catch {
     notFound();
   }
@@ -90,7 +93,6 @@ export default async function ProductPage({
             {product.badge && <span className="badge mt-3">{product.badge}</span>}
             <p className="mt-4 leading-relaxed text-text-mid">{desc}</p>
 
-            {/* Certificates */}
             {product.certificates.length > 0 && (
               <div className="mt-5">
                 <h2 className="mb-2 text-sm font-semibold text-text-dark">{t('certificates')}</h2>
@@ -107,7 +109,6 @@ export default async function ProductPage({
               </div>
             )}
 
-            {/* Full-width Telegram CTA */}
             <a
               href={telegramLink(product.id)}
               target="_blank"
@@ -120,7 +121,6 @@ export default async function ProductPage({
           </div>
         </div>
 
-        {/* Tabbed details */}
         <ProductTabs
           tabs={[
             {
@@ -169,7 +169,6 @@ export default async function ProductPage({
               labelKey: 'documents',
               content: (
                 <div className="max-w-xl space-y-2">
-                  {/* Auto-generated branded datasheet from this product's data */}
                   <a
                     href={`${API_URL}/api/products/${product.slug}/datasheet?lang=${loc}`}
                     target="_blank"
@@ -218,7 +217,6 @@ export default async function ProductPage({
           ]}
         />
 
-        {/* Second Telegram CTA */}
         <div className="mt-14 rounded-2xl bg-gradient-to-r from-blue-dark to-blue-mid p-8 text-center text-white">
           <p className="text-lg font-semibold">
             {loc === 'ru'

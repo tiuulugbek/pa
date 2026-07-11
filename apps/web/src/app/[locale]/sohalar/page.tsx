@@ -7,22 +7,22 @@ import { alternatesFor } from '@/lib/seo';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { IndustryIcon } from '@/components/IndustryIcon';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}): Promise<Metadata> {
-  const t = await getTranslations({ locale: params.locale, namespace: 'industries' });
+type IndustriesPageParams = Promise<{ locale: string }>;
+
+export async function generateMetadata({ params }: { params: IndustriesPageParams }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'industries' });
   return {
     title: t('title'),
     description: t('subtitle'),
-    alternates: alternatesFor(params.locale, '/sohalar'),
+    alternates: alternatesFor(locale, '/sohalar'),
   };
 }
 
-export default async function IndustriesPage({ params }: { params: { locale: string } }) {
-  const loc = params.locale === 'ru' ? 'ru' : params.locale === 'en' ? 'en' : 'uz';
-  setRequestLocale(params.locale);
+export default async function IndustriesPage({ params }: { params: IndustriesPageParams }) {
+  const { locale } = await params;
+  const loc = locale === 'ru' ? 'ru' : locale === 'en' ? 'en' : 'uz';
+  setRequestLocale(locale);
   const t = await getTranslations('industries');
 
   return (
@@ -36,11 +36,7 @@ export default async function IndustriesPage({ params }: { params: { locale: str
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {INDUSTRY_META.map((ind) => (
-            <Link
-              key={ind.key}
-              href={`/sohalar/${ind.slug}`}
-              className="card reveal group p-7"
-            >
+            <Link key={ind.key} href={`/sohalar/${ind.slug}`} className="card reveal group p-7">
               <div className="grid h-14 w-14 place-items-center rounded-xl bg-blue-bg text-blue-dark transition-colors group-hover:bg-blue-dark group-hover:text-white">
                 <IndustryIcon name={ind.icon} className="h-7 w-7" />
               </div>
