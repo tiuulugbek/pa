@@ -66,11 +66,31 @@ jobs:
       - name: Generate Prisma client
         run: pnpm db:generate
 
-      - name: Lint and type-check
-        run: pnpm lint
+      - name: Capture lint and type-check
+        id: lint
+        continue-on-error: true
+        run: pnpm lint > lint-report.txt 2>&1
 
-      - name: Build all workspaces
-        run: pnpm build
+      - name: Upload lint report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: lint-report.txt
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Capture build
+        id: build
+        continue-on-error: true
+        run: pnpm build > build-report.txt 2>&1
+
+      - name: Upload build report
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-report
+          path: build-report.txt
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Validate Docker Compose
         run: |
@@ -81,6 +101,6 @@ jobs:
           NEXT_PUBLIC_TELEGRAM_BOT=@power_automation_bot \
           docker compose config --quiet
 
-      - name: Enforce dependency audit
-        if: steps.audit.outcome == 'failure'
+      - name: Enforce quality gates
+        if: steps.audit.outcome == 'failure' || steps.lint.outcome == 'failure' || steps.build.outcome == 'failure'
         run: exit 1
