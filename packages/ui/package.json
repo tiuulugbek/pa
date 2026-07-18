@@ -18,7 +18,7 @@
     "@pa/types": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^20.14.15",
-    "typescript": "^5.5.4"
+    "@types/node": "^26.1.1",
+    "typescript": "^7.0.2"
   }
 }
